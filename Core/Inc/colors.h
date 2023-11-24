@@ -1,7 +1,7 @@
 /*
  * colors.h
  *
- *  Created on: 22 бер. 2018 р.
+ *  Created on: 22 пїЅпїЅпїЅ. 2018 пїЅ.
  *      Author: Andriy Honcharenko
  */
 
@@ -17,6 +17,7 @@
 #define COLOR_MAGENTA                       (uint16_t)(0xF81F)
 #define COLOR_YELLOW                        (uint16_t)(0xFFE0)
 #define COLOR_WHITE                         (uint16_t)(0xFFFF)
+#define COLOR_PEASHOOT_GREEN                (uint16_t)(0xd6eb)
 
 #define COLOR_NAVY							(uint16_t)(0x000F)
 #define COLOR_DARKGREEN   					(uint16_t)(0x03E0)

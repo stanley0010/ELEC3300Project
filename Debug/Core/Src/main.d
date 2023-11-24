@@ -25,8 +25,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
- ../Core/Src/ili9341.h ../Core/Src/colors.h ../Core/Src/registers.h \
- ../Core/Src/fonts.h ../Core/Src/image.h
+ ../Core/Inc/ili9341.h ../Core/Inc/main.h ../Core/Inc/colors.h \
+ ../Core/Inc/registers.h ../Core/Inc/fonts.h ../Core/Inc/image.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -54,8 +54,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
-../Core/Src/ili9341.h:
-../Core/Src/colors.h:
-../Core/Src/registers.h:
-../Core/Src/fonts.h:
-../Core/Src/image.h:
+../Core/Inc/ili9341.h:
+../Core/Inc/main.h:
+../Core/Inc/colors.h:
+../Core/Inc/registers.h:
+../Core/Inc/fonts.h:
+../Core/Inc/image.h:
