@@ -62,7 +62,7 @@ main-build: PlantPotProject.elf secondary-outputs
 
 # Tool invocations
 PlantPotProject.elf PlantPotProject.map: $(OBJS) $(USER_OBJS) /Users/stanley0010/STM32CubeIDE/workspace_1.9.0/PlantPotProject/STM32F103VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PlantPotProject.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/stanley0010/STM32CubeIDE/workspace_1.9.0/PlantPotProject/STM32F103VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PlantPotProject.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "PlantPotProject.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/stanley0010/STM32CubeIDE/workspace_1.9.0/PlantPotProject/STM32F103VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PlantPotProject.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
