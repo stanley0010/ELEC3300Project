@@ -24,10 +24,10 @@ Core/Src/mk_dht11.o: ../Core/Src/mk_dht11.c ../Core/Inc/mk_dht11.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h \
- ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/main.h
 ../Core/Inc/mk_dht11.h:
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h:
@@ -55,8 +55,8 @@ Core/Src/mk_dht11.o: ../Core/Src/mk_dht11.c ../Core/Inc/mk_dht11.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h:
-../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/main.h:

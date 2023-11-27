@@ -5,34 +5,46 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/Src/lcd/STLogo.c \
 ../Core/Src/lcd/font12.c \
 ../Core/Src/lcd/font16.c \
 ../Core/Src/lcd/font20.c \
 ../Core/Src/lcd/font24.c \
 ../Core/Src/lcd/font8.c \
 ../Core/Src/lcd/ili9341.c \
-../Core/Src/lcd/peashooter_000.c 
+../Core/Src/lcd/peashooter_000.c \
+../Core/Src/lcd/peashooter_001.c \
+../Core/Src/lcd/peashooter_002.c \
+../Core/Src/lcd/peashooter_003.c \
+../Core/Src/lcd/peashooter_004.c \
+../Core/Src/lcd/peashooter_005.c 
 
 OBJS += \
-./Core/Src/lcd/STLogo.o \
 ./Core/Src/lcd/font12.o \
 ./Core/Src/lcd/font16.o \
 ./Core/Src/lcd/font20.o \
 ./Core/Src/lcd/font24.o \
 ./Core/Src/lcd/font8.o \
 ./Core/Src/lcd/ili9341.o \
-./Core/Src/lcd/peashooter_000.o 
+./Core/Src/lcd/peashooter_000.o \
+./Core/Src/lcd/peashooter_001.o \
+./Core/Src/lcd/peashooter_002.o \
+./Core/Src/lcd/peashooter_003.o \
+./Core/Src/lcd/peashooter_004.o \
+./Core/Src/lcd/peashooter_005.o 
 
 C_DEPS += \
-./Core/Src/lcd/STLogo.d \
 ./Core/Src/lcd/font12.d \
 ./Core/Src/lcd/font16.d \
 ./Core/Src/lcd/font20.d \
 ./Core/Src/lcd/font24.d \
 ./Core/Src/lcd/font8.d \
 ./Core/Src/lcd/ili9341.d \
-./Core/Src/lcd/peashooter_000.d 
+./Core/Src/lcd/peashooter_000.d \
+./Core/Src/lcd/peashooter_001.d \
+./Core/Src/lcd/peashooter_002.d \
+./Core/Src/lcd/peashooter_003.d \
+./Core/Src/lcd/peashooter_004.d \
+./Core/Src/lcd/peashooter_005.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -42,7 +54,7 @@ Core/Src/lcd/%.o Core/Src/lcd/%.su: ../Core/Src/lcd/%.c Core/Src/lcd/subdir.mk
 clean: clean-Core-2f-Src-2f-lcd
 
 clean-Core-2f-Src-2f-lcd:
-	-$(RM) ./Core/Src/lcd/STLogo.d ./Core/Src/lcd/STLogo.o ./Core/Src/lcd/STLogo.su ./Core/Src/lcd/font12.d ./Core/Src/lcd/font12.o ./Core/Src/lcd/font12.su ./Core/Src/lcd/font16.d ./Core/Src/lcd/font16.o ./Core/Src/lcd/font16.su ./Core/Src/lcd/font20.d ./Core/Src/lcd/font20.o ./Core/Src/lcd/font20.su ./Core/Src/lcd/font24.d ./Core/Src/lcd/font24.o ./Core/Src/lcd/font24.su ./Core/Src/lcd/font8.d ./Core/Src/lcd/font8.o ./Core/Src/lcd/font8.su ./Core/Src/lcd/ili9341.d ./Core/Src/lcd/ili9341.o ./Core/Src/lcd/ili9341.su ./Core/Src/lcd/peashooter_000.d ./Core/Src/lcd/peashooter_000.o ./Core/Src/lcd/peashooter_000.su
+	-$(RM) ./Core/Src/lcd/font12.d ./Core/Src/lcd/font12.o ./Core/Src/lcd/font12.su ./Core/Src/lcd/font16.d ./Core/Src/lcd/font16.o ./Core/Src/lcd/font16.su ./Core/Src/lcd/font20.d ./Core/Src/lcd/font20.o ./Core/Src/lcd/font20.su ./Core/Src/lcd/font24.d ./Core/Src/lcd/font24.o ./Core/Src/lcd/font24.su ./Core/Src/lcd/font8.d ./Core/Src/lcd/font8.o ./Core/Src/lcd/font8.su ./Core/Src/lcd/ili9341.d ./Core/Src/lcd/ili9341.o ./Core/Src/lcd/ili9341.su ./Core/Src/lcd/peashooter_000.d ./Core/Src/lcd/peashooter_000.o ./Core/Src/lcd/peashooter_000.su ./Core/Src/lcd/peashooter_001.d ./Core/Src/lcd/peashooter_001.o ./Core/Src/lcd/peashooter_001.su ./Core/Src/lcd/peashooter_002.d ./Core/Src/lcd/peashooter_002.o ./Core/Src/lcd/peashooter_002.su ./Core/Src/lcd/peashooter_003.d ./Core/Src/lcd/peashooter_003.o ./Core/Src/lcd/peashooter_003.su ./Core/Src/lcd/peashooter_004.d ./Core/Src/lcd/peashooter_004.o ./Core/Src/lcd/peashooter_004.su ./Core/Src/lcd/peashooter_005.d ./Core/Src/lcd/peashooter_005.o ./Core/Src/lcd/peashooter_005.su
 
 .PHONY: clean-Core-2f-Src-2f-lcd
 

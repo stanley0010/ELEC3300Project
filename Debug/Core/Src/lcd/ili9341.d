@@ -24,10 +24,10 @@ Core/Src/lcd/ili9341.o: ../Core/Src/lcd/ili9341.c ../Core/Inc/ili9341.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h \
- ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/colors.h ../Core/Inc/registers.h ../Core/Inc/fonts.h \
  ../Core/Inc/image.h
 ../Core/Inc/ili9341.h:
@@ -57,10 +57,10 @@ Core/Src/lcd/ili9341.o: ../Core/Src/lcd/ili9341.c ../Core/Inc/ili9341.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h:
-../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/colors.h:
 ../Core/Inc/registers.h:
 ../Core/Inc/fonts.h:

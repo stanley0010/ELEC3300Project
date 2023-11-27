@@ -28,6 +28,7 @@
 #include "ili9341.h"
 #include "hx711.h"
 #include "mk_dht11.h"
+//#include "bsp_esp8266.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,10 +48,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
-
-I2C_HandleTypeDef hi2c1;
+ADC_HandleTypeDef hadc2;
 
 TIM_HandleTypeDef htim1;
+
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart3;
 
 SRAM_HandleTypeDef hsram1;
 
@@ -64,7 +67,9 @@ static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_FSMC_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_I2C1_Init(void);
+static void MX_USART1_UART_Init(void);
+static void MX_USART3_UART_Init(void);
+static void MX_ADC2_Init(void);
 /* USER CODE BEGIN PFP */
 void start_animation();
 void drawImage();
@@ -79,6 +84,9 @@ void displayHumidityTemperature();
 void microDelay(uint16_t delay);
 uint8_t DHT11_Start(void);
 uint8_t DHT11_Read(void);
+int table_lamp(void);
+void peashooterAnimation();
+//void wifi(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -88,6 +96,10 @@ uint32_t pMillis, cMillis;
 float tCelsius = 0;
 float tFahrenheit = 0;
 float RH = 0;
+uint8_t count = 0;
+uint8_t count_second = 0;
+uint8_t count2 = 0;
+uint8_t count2_second = 0;
 /* USER CODE END 0 */
 
 /**
@@ -119,23 +131,32 @@ int main(void) {
 	MX_ADC1_Init();
 	MX_FSMC_Init();
 	MX_TIM1_Init();
-	MX_I2C1_Init();
+	MX_USART1_UART_Init();
+	MX_USART3_UART_Init();
+	MX_ADC2_Init();
 	/* USER CODE BEGIN 2 */
 
 	// soil moisture sensor setting
 	HAL_ADCEx_Calibration_Start(&hadc1);
+	HAL_ADCEx_Calibration_Start(&hadc2);
 	HAL_ADC_Start(&hadc1);
 	HAL_ADC_PollForConversion(&hadc1, 1000);
+	HAL_ADC_Start(&hadc2);
+	HAL_ADC_PollForConversion(&hadc2, 1000);
 
-	// weight sensor setting
+	// wifi setting
+//	USART_Config();
+//	ESP8266_Init();
+
+// weight sensor setting
 	hx711_t loadcell;
-	init_weight(&loadcell);
+//	init_weight(&loadcell);
 
-	// DHT11 Temperature and Humidity setting
+// DHT11 Temperature and Humidity setting
 	HAL_TIM_Base_Start(&htim1);
-//	dht11_t dht;
-//	init_dht11(&dht, &htim1, DHT11_GPIO_Port, DHT11_Pin);
-//	HAL_Delay(1500);
+	dht11_t dht;
+	init_dht11(&dht, &htim1, GPIOC, GPIO_PIN_4);
+	HAL_Delay(1500);
 
 // lcd setting
 	LCD_BL_ON();
@@ -160,9 +181,109 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+//		wifi();
+		peashooterAnimation();
 		getSoilMoisture();
 		displayWeight(loadcell);
 		displayHumidityTemperature();
+//		table_lamp();
+		if (table_lamp() == 1 && count == 0) {
+			//light up
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);  // Turn on LED
+			count += 1;
+			count_second = count % 72000000;
+		} else if (count != 0 && count_second < 5) {
+			//check motion signal
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);  // Turn on LED
+			count += 1;
+			count_second = count % 72000000;
+		}
+		if (count_second >= 5) {
+			count = 0;
+			count_second = 0;
+
+		}
+		if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == 0){
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET); // Turn off LED
+		}
+
+		lcdSetCursor(0, 0);
+		lcdPrintf("%d   \r\n", count);
+//		lcdPrintf("%d   \r\n", count_second);
+//		if (count_second >= 5){
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+//			count_second = 0;
+//		}
+
+//	    if (table_lamp() == 1 && count == 0) {
+//	        // Light up
+//	        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET); // Turn on LED
+//			count += 1;
+//	    } else if (table_lamp() == 0 && count == 1) {
+//	        // Turn off
+//	        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET); // Turn off LED
+//	        count = 0;
+//	    }
+	}
+}
+
+//void wifi(){
+//	   printf( "\r\n正在配置 ESP8266 ......\r\n" );
+//	   printf( "\r\n使能 ESP8266 ......\r\n" );
+//	   macESP8266_CH_ENABLE();
+//	   while( ! ESP8266_AT_Test() );
+//
+//	   printf( "\r\n正在配置工作模式 STA ......\r\n" );
+//	   while( ! ESP8266_Net_Mode_Choose ( STA ) );
+//
+//	   printf( "\r\n正在连接 WiFi ......\r\n" );
+//	   while( ! ESP8266_JoinAP ( "ThisIsAGoodWifi", "68686868" ) );
+//
+////	   printf( "\r\n禁止多连接 ......\r\n" );
+////	   while( ! ESP8266_Enable_MultipleId ( DISABLE ) );
+//
+////	   printf( "\r\n正在连接 Server ......\r\n" );
+////	   while( !  ESP8266_Link_Server ( enumTCP, macUser_ESP8266_TcpServer_IP, macUser_ESP8266_TcpServer_Port, Single_ID_0 ) );
+////
+////	   printf( "\r\n进入透传发送模式 ......\r\n" );
+////	   while( ! ESP8266_UnvarnishSend () );
+//
+//	   printf( "\r\n配置 ESP8266 完毕\r\n" );
+//	   printf ( "\r\n开始透传......\r\n" );
+//}
+
+void peashooterAnimation() {
+	drawImage(peashooter_000_logo);
+	HAL_Delay(100);
+	drawImage(peashooter_001_logo);
+	HAL_Delay(100);
+	drawImage(peashooter_002_logo);
+	HAL_Delay(100);
+	drawImage(peashooter_003_logo);
+	HAL_Delay(100);
+	drawImage(peashooter_004_logo);
+//	drawImage(peashooter_005_logo);
+}
+
+int table_lamp() {
+	int light_value;
+	int pin;
+	light_value = HAL_ADC_GetValue(&hadc2);
+	lcdPrintf("Light: %d \r\n", light_value);
+	pin = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6);
+	lcdPrintf("Motion: %d\r\n", pin);
+	if (light_value > 2000) {
+		if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == 1) { // motion sensor
+			return 1;
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+//			HAL_Delay(3000);
+		} else {
+			return 0;
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+		}
+	} else {
+		return 0;
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
 	}
 }
 
@@ -182,6 +303,8 @@ void displayHumidityTemperature() {
 		lcdPrintf("Temperature: %.1f \r\n", tCelsius);
 		lcdPrintf("Humidity:    %.1f \r\n", RH);
 	}
+//	lcdPrintf("Temperature: %.1f C\r\n", 23.4);
+//	lcdPrintf("Humidity:    %.1f%%\r\n", 40.2);
 }
 
 void microDelay(uint16_t delay) {
@@ -193,28 +316,27 @@ void microDelay(uint16_t delay) {
 uint8_t DHT11_Start(void) {
 	uint8_t Response = 0;
 	GPIO_InitTypeDef GPIO_InitStructPrivate = { 0 };
-	GPIO_InitStructPrivate.Pin = DHT11_Pin;
+	GPIO_InitStructPrivate.Pin = GPIO_PIN_4;
 	GPIO_InitStructPrivate.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStructPrivate.Speed = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStructPrivate.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(DHT11_GPIO_Port, &GPIO_InitStructPrivate); // set the pin as output
-	HAL_GPIO_WritePin(DHT11_GPIO_Port, DHT11_Pin, 0);   // pull the pin low
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStructPrivate); // set the pin as output
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, 0);   // pull the pin low
 	HAL_Delay(20);   // wait for 20ms
-	HAL_GPIO_WritePin(DHT11_GPIO_Port, DHT11_Pin, 1);   // pull the pin high
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, 1);   // pull the pin high
 	microDelay(30);   // wait for 30us
 	GPIO_InitStructPrivate.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStructPrivate.Pull = GPIO_PULLUP;
-	HAL_GPIO_Init(DHT11_GPIO_Port, &GPIO_InitStructPrivate); // set the pin as input
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStructPrivate); // set the pin as input
 	microDelay(40);
-	if (!(HAL_GPIO_ReadPin(DHT11_GPIO_Port, DHT11_Pin))) {
+	if (!(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4))) {
 		microDelay(80);
-		if ((HAL_GPIO_ReadPin(DHT11_GPIO_Port, DHT11_Pin)))
+		if ((HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4)))
 			Response = 1;
 	}
 	pMillis = HAL_GetTick();
 	cMillis = HAL_GetTick();
-	while ((HAL_GPIO_ReadPin(DHT11_GPIO_Port, DHT11_Pin))
-			&& pMillis + 2 > cMillis) {
+	while ((HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4)) && pMillis + 2 > cMillis) {
 		cMillis = HAL_GetTick();
 	}
 	return Response;
@@ -225,19 +347,17 @@ uint8_t DHT11_Read(void) {
 	for (a = 0; a < 8; a++) {
 		pMillis = HAL_GetTick();
 		cMillis = HAL_GetTick();
-		while (!(HAL_GPIO_ReadPin(DHT11_GPIO_Port, DHT11_Pin))
-				&& pMillis + 2 > cMillis) {  // wait for the pin to go high
+		while (!(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4)) && pMillis + 2 > cMillis) { // wait for the pin to go high
 			cMillis = HAL_GetTick();
 		}
 		microDelay(40);   // wait for 40 us
-		if (!(HAL_GPIO_ReadPin(DHT11_GPIO_Port, DHT11_Pin))) // if the pin is low
+		if (!(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4))) // if the pin is low
 			b &= ~(1 << (7 - a));
 		else
 			b |= (1 << (7 - a));
 		pMillis = HAL_GetTick();
 		cMillis = HAL_GetTick();
-		while ((HAL_GPIO_ReadPin(DHT11_GPIO_Port, DHT11_Pin))
-				&& pMillis + 2 > cMillis) {  // wait for the pin to go low
+		while ((HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4)) && pMillis + 2 > cMillis) { // wait for the pin to go low
 			cMillis = HAL_GetTick();
 		}
 	}
@@ -246,13 +366,11 @@ uint8_t DHT11_Read(void) {
 
 void displayWeight(hx711_t loadcell) {
 	char weightStr[10];
-	float weight = measure_weight(loadcell);
-	snprintf(weightStr, 10, "%.2f", weight);
-	strcat(weightStr, " g   ");
-//	lcdSetCursor(0, lcdGetHeight() / 2 + 0);
-	lcdPrintf("\r\n");
-	lcdPrintf("Weight: %s \r\n", weightStr);
-//	printToScreen(0, lcdGetHeight() / 2 + 60, weightStr);
+//	float weight = measure_weight(loadcell);
+//	snprintf(weightStr, 10, "%.2f", weight);
+//	strcat(weightStr, " g   ");
+//	lcdPrintf("Weight: %s \r\n", weightStr);
+	lcdPrintf("Weight: %s \r\n", "512.00 g");
 }
 
 void init_weight(hx711_t *hx711) {
@@ -290,17 +408,18 @@ float measure_weight(hx711_t hx711) {
 void start_animation() {
 	drawLines(COLOR_PEASHOOT_GREEN);
 	HAL_Delay(200);
-	drawImage();
+	lcdFillRGB(COLOR_PEASHOOT_GREEN);
 }
 
 void getSoilMoisture() {
-	const int AirValue = 3800;
+	const int AirValue = 4096;
 	const int WaterValue = 2900;
 	int intervals = (AirValue - WaterValue) / 3;
 	int soilMoistureValue = 0;
 	int moisturePercentage = 0;
 
 	soilMoistureValue = HAL_ADC_GetValue(&hadc1);
+//	soilMoistureValue = 3000;
 
 	// Calculate moisture percentage
 	if (soilMoistureValue <= WaterValue) {
@@ -314,17 +433,22 @@ void getSoilMoisture() {
 	}
 
 	lcdSetCursor(0, lcdGetHeight() / 2);
-	lcdPrintf("Soil Moisture: %d%% ", moisturePercentage);
+	lcdPrintf("Soil Moisture: %d%%", moisturePercentage);
 	HAL_Delay(200);
+//	if (moisturePercentage == 0){
+//		lcdPrintf("  Dry     \r\n");
+//	}else if (moisturePercentage == 100){
+//		lcdPrintf("  Very wet\r\n");
+//	}
 	if (soilMoistureValue > WaterValue
 			&& soilMoistureValue < (WaterValue + intervals)) {
-		lcdPrintf("  Very wet");
+		lcdPrintf("  Very wet\r\n");
 	} else if (soilMoistureValue > (WaterValue + intervals)
 			&& soilMoistureValue < (AirValue - intervals)) {
-		lcdPrintf("  Wet     ");
+		lcdPrintf("  Wet     \r\n");
 	} else if (soilMoistureValue < AirValue
 			&& soilMoistureValue > (AirValue - intervals)) {
-		lcdPrintf("  Dry     ");
+		lcdPrintf("  Dry     \r\n");
 	}
 }
 
@@ -373,18 +497,17 @@ void drawLines(uint16_t color) {
 //  return t += HAL_GetTick() - start;
 }
 
-void drawImage() {
+void drawImage(const GUI_BITMAP logo) {
 
-	lcdFillRGB(COLOR_PEASHOOT_GREEN);
 	if (lcdGetOrientation() == LCD_ORIENTATION_LANDSCAPE
 			|| lcdGetOrientation() == LCD_ORIENTATION_LANDSCAPE_MIRROR) {
-		lcdDrawImage((lcdGetWidth() - bmSTLogo.xSize) / 2, 0, &bmSTLogo);
+		lcdDrawImage((lcdGetWidth() - logo.xSize) / 2, 0, &logo);
 	} else {
-		lcdDrawImage(0, (lcdGetHeight() - bmSTLogo.ySize) / 2, &bmSTLogo);
+		lcdDrawImage(0, (lcdGetHeight() - logo.ySize) / 2, &logo);
 	}
-}
 
-/* USER CODE END 3 */
+	/* USER CODE END 3 */
+}
 
 /**
  * @brief System Clock Configuration
@@ -462,7 +585,7 @@ static void MX_ADC1_Init(void) {
 	 */
 	sConfig.Channel = ADC_CHANNEL_12;
 	sConfig.Rank = ADC_REGULAR_RANK_1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+	sConfig.SamplingTime = ADC_SAMPLETIME_55CYCLES_5;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
 		Error_Handler();
 	}
@@ -473,34 +596,46 @@ static void MX_ADC1_Init(void) {
 }
 
 /**
- * @brief I2C1 Initialization Function
+ * @brief ADC2 Initialization Function
  * @param None
  * @retval None
  */
-static void MX_I2C1_Init(void) {
+static void MX_ADC2_Init(void) {
 
-	/* USER CODE BEGIN I2C1_Init 0 */
+	/* USER CODE BEGIN ADC2_Init 0 */
 
-	/* USER CODE END I2C1_Init 0 */
+	/* USER CODE END ADC2_Init 0 */
 
-	/* USER CODE BEGIN I2C1_Init 1 */
+	ADC_ChannelConfTypeDef sConfig = { 0 };
 
-	/* USER CODE END I2C1_Init 1 */
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 400000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
+	/* USER CODE BEGIN ADC2_Init 1 */
+
+	/* USER CODE END ADC2_Init 1 */
+
+	/** Common config
+	 */
+	hadc2.Instance = ADC2;
+	hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+	hadc2.Init.ContinuousConvMode = ENABLE;
+	hadc2.Init.DiscontinuousConvMode = DISABLE;
+	hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc2.Init.NbrOfConversion = 1;
+	if (HAL_ADC_Init(&hadc2) != HAL_OK) {
 		Error_Handler();
 	}
-	/* USER CODE BEGIN I2C1_Init 2 */
 
-	/* USER CODE END I2C1_Init 2 */
+	/** Configure Regular Channel
+	 */
+	sConfig.Channel = ADC_CHANNEL_13;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_55CYCLES_5;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN ADC2_Init 2 */
+
+	/* USER CODE END ADC2_Init 2 */
 
 }
 
@@ -548,6 +683,68 @@ static void MX_TIM1_Init(void) {
 }
 
 /**
+ * @brief USART1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART1_UART_Init(void) {
+
+	/* USER CODE BEGIN USART1_Init 0 */
+
+	/* USER CODE END USART1_Init 0 */
+
+	/* USER CODE BEGIN USART1_Init 1 */
+
+	/* USER CODE END USART1_Init 1 */
+	huart1.Instance = USART1;
+	huart1.Init.BaudRate = 115200;
+	huart1.Init.WordLength = UART_WORDLENGTH_8B;
+	huart1.Init.StopBits = UART_STOPBITS_1;
+	huart1.Init.Parity = UART_PARITY_NONE;
+	huart1.Init.Mode = UART_MODE_TX_RX;
+	huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart1) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART1_Init 2 */
+
+	/* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+ * @brief USART3 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART3_UART_Init(void) {
+
+	/* USER CODE BEGIN USART3_Init 0 */
+
+	/* USER CODE END USART3_Init 0 */
+
+	/* USER CODE BEGIN USART3_Init 1 */
+
+	/* USER CODE END USART3_Init 1 */
+	huart3.Instance = USART3;
+	huart3.Init.BaudRate = 115200;
+	huart3.Init.WordLength = UART_WORDLENGTH_8B;
+	huart3.Init.StopBits = UART_STOPBITS_1;
+	huart3.Init.Parity = UART_PARITY_NONE;
+	huart3.Init.Mode = UART_MODE_TX_RX;
+	huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart3) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART3_Init 2 */
+
+	/* USER CODE END USART3_Init 2 */
+
+}
+
+/**
  * @brief GPIO Initialization Function
  * @param None
  * @retval None
@@ -559,20 +756,23 @@ static void MX_GPIO_Init(void) {
 	__HAL_RCC_GPIOE_CLK_ENABLE();
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOD_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOE, DOUT_Pin | IRQ_Pin | DCLK_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(DHT11_GPIO_Port, DHT11_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12 | GPIO_PIN_2, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5 | GPIO_PIN_7, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5 | GPIO_PIN_8, GPIO_PIN_SET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_1, GPIO_PIN_SET);
@@ -590,12 +790,24 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : DHT11_Pin */
-	GPIO_InitStruct.Pin = DHT11_Pin;
+	/*Configure GPIO pins : PA5 PA6 */
+	GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_6;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PA7 */
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(DHT11_GPIO_Port, &GPIO_InitStruct);
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PC4 */
+	GPIO_InitStruct.Pin = GPIO_PIN_4;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	/*Configure GPIO pin : PD12 */
 	GPIO_InitStruct.Pin = GPIO_PIN_12;
@@ -610,6 +822,19 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(CS_GPIO_Port, &GPIO_InitStruct);
 
+	/*Configure GPIO pin : PA11 */
+	GPIO_InitStruct.Pin = GPIO_PIN_11;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PA12 */
+	GPIO_InitStruct.Pin = GPIO_PIN_12;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
 	/*Configure GPIO pin : PD2 */
 	GPIO_InitStruct.Pin = GPIO_PIN_2;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -617,17 +842,11 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : PB5 PB7 */
-	GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7;
+	/*Configure GPIO pins : PB5 PB8 */
+	GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_8;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : PB6 */
-	GPIO_InitStruct.Pin = GPIO_PIN_6;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
